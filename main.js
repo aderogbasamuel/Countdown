@@ -27,42 +27,39 @@ setInterval(updateCountdown, 1000);
 updateCountdown();
 
 /* ======================
-   ROAST / MOTIVATION BANK
+   RESPONSES (ROAST + MOTIVATION)
 ====================== */
 
-const messages = {
+const responses = {
   not_ready: [
-    "Be honest… is it vibes you’re revising with?",
-    "Time is ticking. Future You is already worried.",
-    "No stress, but this is the wake-up call.",
-    "You still have time — but not that much."
+    "You still have time… but time is running faster than you think 😭",
+    "At this point, your textbook is still a stranger.",
+    "No pressure, but the exam is not waiting for motivation.",
+    "Hope is not a strategy. Start now."
   ],
-
   slightly_ready: [
-    "Good start. Now please don’t relax.",
-    "You’ve entered the danger zone of false confidence.",
-    "Nice effort. Consistency will save you.",
-    "Not bad… but not safe either."
+    "Okay… at least you opened the book once.",
+    "Small progress is still progress. Push harder.",
+    "You’ve started — now don’t stop.",
+    "You know some things… but do you know enough?"
   ],
-
   moderately_ready: [
-    "This is where serious students live.",
-    "You’re doing well — don’t drop the ball.",
-    "A little more grind and you’ll be solid.",
-    "Stay focused. You’re close."
+    "You’re doing well. Consistency will save you.",
+    "This is the dangerous zone — don’t relax now.",
+    "Keep revising. Confidence comes from repetition.",
+    "You’re closer than you think."
   ],
-
   fully_ready: [
-    "We see you. Calm confidence.",
-    "Just revision and vibes now.",
-    "Don’t get overconfident — but you’re good.",
-    "Exam fear fears you."
+    "Calm down academic weapon 😎",
+    "Revision mode activated. Respect.",
+    "You’ve done your part. Stay sharp.",
+    "Confidence backed by preparation — love to see it."
   ]
 };
 
-function getRandomMessage(level) {
-  const arr = messages[level];
-  return arr[Math.floor(Math.random() * arr.length)];
+function getRandomResponse(level) {
+  const list = responses[level];
+  return list[Math.floor(Math.random() * list.length)];
 }
 
 /* ======================
@@ -80,23 +77,22 @@ if (storedChoice) {
 buttons.forEach(btn => {
   btn.addEventListener("click", () => {
     if (localStorage.getItem("exam_readiness")) return;
-
+    
     const level = btn.dataset.level;
     localStorage.setItem("exam_readiness", level);
-
+    
     lockSelection(level);
     sendToBackend(level);
   });
 });
 
 function lockSelection(level) {
-  buttons.forEach(b => (b.disabled = true));
-
-  const message = getRandomMessage(level);
+  buttons.forEach(b => b.disabled = true);
+  
+  const message = getRandomResponse(level);
   feedback.textContent = message;
   feedback.classList.add("show");
 }
-
 /* ======================
    FIREBASE BACKEND
 ====================== */
