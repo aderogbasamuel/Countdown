@@ -132,10 +132,19 @@ async function sendToBackend(level) {
 
 onSnapshot(statsRef, (docSnap) => {
   if (!docSnap.exists()) return;
-
+  
   const data = docSnap.data();
+  const total = Object.values(data).reduce((a, b) => a + b, 0);
+  
   Object.keys(data).forEach(key => {
-    const el = document.getElementById(`count-${key}`);
-    if (el) el.textContent = data[key];
+    const countEl = document.getElementById(`count-${key}`);
+    const barEl = document.getElementById(`bar-${key}`);
+    
+    if (!countEl || !barEl) return;
+    
+    countEl.textContent = data[key];
+    
+    const percent = total === 0 ? 0 : (data[key] / total) * 100;
+    barEl.style.width = percent + "%";
   });
 });
