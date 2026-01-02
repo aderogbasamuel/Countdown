@@ -27,6 +27,45 @@ setInterval(updateCountdown, 1000);
 updateCountdown();
 
 /* ======================
+   ROAST / MOTIVATION BANK
+====================== */
+
+const messages = {
+  not_ready: [
+    "Be honest… is it vibes you’re revising with?",
+    "Time is ticking. Future You is already worried.",
+    "No stress, but this is the wake-up call.",
+    "You still have time — but not that much."
+  ],
+
+  slightly_ready: [
+    "Good start. Now please don’t relax.",
+    "You’ve entered the danger zone of false confidence.",
+    "Nice effort. Consistency will save you.",
+    "Not bad… but not safe either."
+  ],
+
+  moderately_ready: [
+    "This is where serious students live.",
+    "You’re doing well — don’t drop the ball.",
+    "A little more grind and you’ll be solid.",
+    "Stay focused. You’re close."
+  ],
+
+  fully_ready: [
+    "We see you. Calm confidence.",
+    "Just revision and vibes now.",
+    "Don’t get overconfident — but you’re good.",
+    "Exam fear fears you."
+  ]
+};
+
+function getRandomMessage(level) {
+  const arr = messages[level];
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+/* ======================
    LOCAL STORAGE LOCK
 ====================== */
 
@@ -34,7 +73,9 @@ const buttons = document.querySelectorAll(".options button");
 const feedback = document.getElementById("feedback");
 const storedChoice = localStorage.getItem("exam_readiness");
 
-if (storedChoice) lockSelection();
+if (storedChoice) {
+  lockSelection(storedChoice);
+}
 
 buttons.forEach(btn => {
   btn.addEventListener("click", () => {
@@ -42,14 +83,17 @@ buttons.forEach(btn => {
 
     const level = btn.dataset.level;
     localStorage.setItem("exam_readiness", level);
-    lockSelection();
+
+    lockSelection(level);
     sendToBackend(level);
   });
 });
 
-function lockSelection() {
-  buttons.forEach(b => b.disabled = true);
-  feedback.textContent = "Your response has been recorded.";
+function lockSelection(level) {
+  buttons.forEach(b => (b.disabled = true));
+
+  const message = getRandomMessage(level);
+  feedback.textContent = message;
   feedback.classList.add("show");
 }
 
@@ -69,7 +113,6 @@ import {
 } from
   "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* 🔴 REPLACE WITH YOUR OWN FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyCnK1EjSHuj46RNS2PYW9oocdKOsGDrXG4",
   authDomain: "exam-countdown-d959a.firebaseapp.com",
