@@ -1,6 +1,7 @@
 /* ======================
    COUNTDOWN LOGIC
 ====================== */
+
 const countdownEl = document.getElementById("countdown");
 const examDate = new Date("March 12, 2026 00:00:00").getTime();
 
@@ -9,7 +10,7 @@ function updateCountdown() {
   const diff = examDate - now;
 
   if (diff <= 0) {
-    countdownEl.textContent = "EXAM TIME 🔥";
+    countdownEl.textContent = "EXAM TIME";
     return;
   }
 
@@ -28,6 +29,7 @@ updateCountdown();
 /* ======================
    RESPONSES (ROAST + MOTIVATION)
 ====================== */
+
 const responses = {
   not_ready: [
     "You still have time… but time is running faster than you think 😭",
@@ -61,62 +63,51 @@ function getRandomResponse(level) {
 }
 
 /* ======================
-   LOCAL STORAGE + SELECTION
+   LOCAL STORAGE LOCK
 ====================== */
+
 const buttons = document.querySelectorAll(".options button");
 const feedback = document.getElementById("feedback");
+const storedChoice = localStorage.getItem("exam_readiness");
 
-// Get previously selected choice
-let storedChoice = localStorage.getItem("exam_readiness");
-
-// Highlight previously selected choice on load
 if (storedChoice) {
-  highlightSelection(storedChoice);
-  showFeedback(storedChoice);
+  lockSelection(storedChoice);
 }
 
 buttons.forEach(btn => {
   btn.addEventListener("click", () => {
+    if (localStorage.getItem("exam_readiness")) return;
+    
     const level = btn.dataset.level;
-
-    // Update localStorage with new selection
     localStorage.setItem("exam_readiness", level);
-    storedChoice = level;
-
-    // Highlight the currently selected button
-    highlightSelection(level);
-
-    // Show a random feedback message
-    showFeedback(level);
-
-    // Send vote to Firebase
+    
+    lockSelection(level);
     sendToBackend(level);
   });
 });
 
-function highlightSelection(level) {
-  buttons.forEach(b => {
-    if (b.dataset.level === level) {
-      b.style.backgroundColor = "#0aff9d";
-      b.style.color = "black";
-    } else {
-      b.style.backgroundColor = "transparent";
-      b.style.color = "#0aff9d";
-    }
-  });
-}
-
-function showFeedback(level) {
+function lockSelection(level) {
+  buttons.forEach(b => b.disabled = true);
+  
   const message = getRandomResponse(level);
   feedback.textContent = message;
   feedback.classList.add("show");
 }
-
 /* ======================
    FIREBASE BACKEND
 ====================== */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+import { initializeApp } from
+  "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
+import {
+  getFirestore,
+  doc,
+  updateDoc,
+  increment,
+  onSnapshot
+} from
+  "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCnK1EjSHuj46RNS2PYW9oocdKOsGDrXG4",
@@ -124,32 +115,35 @@ const firebaseConfig = {
   projectId: "exam-countdown-d959a",
 };
 
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
 const statsRef = doc(db, "readinessStats", "counts");
 
 async function sendToBackend(level) {
-  await updateDoc(statsRef, { [level]: increment(1) });
+  await updateDoc(statsRef, {
+    [level]: increment(1)
+  });
 }
 
 /* ======================
-   LIVE COUNTS + PERCENTAGE BARS
+   LIVE COUNTS
 ====================== */
+
 onSnapshot(statsRef, (docSnap) => {
   if (!docSnap.exists()) return;
-
+  
   const data = docSnap.data();
   const total = Object.values(data).reduce((a, b) => a + b, 0);
-
+  
   Object.keys(data).forEach(key => {
     const countEl = document.getElementById(`count-${key}`);
     const barEl = document.getElementById(`bar-${key}`);
-
+    
     if (!countEl || !barEl) return;
-
+    
     countEl.textContent = data[key];
-
+    
     const percent = total === 0 ? 0 : (data[key] / total) * 100;
     barEl.style.width = percent + "%";
   });
